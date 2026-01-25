@@ -16,15 +16,25 @@ export class CricketApiService {
       });
 
       return response.data;
-    } catch (error) { 
+    } catch (error) {
       console.error(error.response?.data || error.message);
       throw new HttpException('Failed to fetch players', 502);
     }
   }
 
-  async getPlayerStats(playerId: string) {
-    return axios.get(`${this.baseUrl}/player_stats`, {
-      params: { id: playerId, apiKey: this.apiKey }
-    });
+  async getPlayerDetails(playerId: string) {
+    try {
+      const response = await axios.get(`${this.baseUrl}/players_info`, {
+        params: {
+          id: playerId,
+          apiKey: this.apiKey
+        }
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error(error.response?.data || error.message);
+      throw new HttpException('Failed to fetch players', 502);
+    }
   }
 }
