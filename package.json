@@ -1,0 +1,24 @@
+{
+  "name": "cricket-stats-platform",
+  "version": "1.0.0",
+  "main": "index.js",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:backend": "npm --workspace apps/backend run start:dev",
+    "dev:frontend": "npm --workspace apps/frontend run dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ajain-cloud/cricket-stats-platform.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ajain-cloud/cricket-stats-platform/issues"
+  },
+  "homepage": "https://github.com/ajain-cloud/cricket-stats-platform#readme",
+  "description": ""
+}
