@@ -8,7 +8,15 @@ export class CacheService {
     return this.cache.get(key);
   }
 
-  set(key: string, value: any) {
-    return this.cache.set(key, value);
+  set(key: string, value: any): void {
+    this.cache.set(key, value);
+  }
+
+  delete(key: string): void {
+    this.cache.delete(key);
+  }
+
+  clear(): void {
+    this.cache.clear();
   }
 }
