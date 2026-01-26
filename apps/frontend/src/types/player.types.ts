@@ -10,11 +10,29 @@ export interface PlayerProfile {
 
 export interface PlayerAggregateResponse {
   profile: PlayerProfile;
-  stats: any;
+  stats: PlayerStats;
 }
 
 export interface PlayerSearchItem {
   id: string;
   name: string;
   country: string;
+}
+
+export interface FormatBattingStats {
+  matches?: number;
+  runs?: number;
+  average?: number;
+  strikeRate?: number;
+}
+
+export interface FormatBowlingStats {
+  wickets?: number;
+  economy?: number;
+  average?: number;
+}
+
+export interface PlayerStats {
+  batting: Record<string, FormatBattingStats>;
+  bowling: Record<string, FormatBowlingStats>;
 }
