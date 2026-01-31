@@ -35,7 +35,7 @@ export default function StatsTable<T extends object>({ title, stats }: StatsTabl
               <td className="p-2 border uppercase">{format}</td>
               {statKeys.map((statKey) => (
                 <td key={statKey} className="p-2 border text-center">
-                  {(stats[format] as Record<string, number | undefined>)?.statKey ?? '-'}
+                  {(stats[format] as Record<string, number | undefined>)?.[statKey] ?? '-'}
                 </td>
               ))}
             </tr>
