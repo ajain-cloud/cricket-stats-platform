@@ -1,3 +1,5 @@
+![CI](https://github.com/ajain-cloud/cricket-stats-platform/actions/workflows/ci.yml/badge.svg)
+
 # 🏏 Cricket Player Stats App
 
 A full-stack cricket player search and stats application built with **NestJS**, **React**, and **TypeScript**, using the **CricAPI** as the external data source.
