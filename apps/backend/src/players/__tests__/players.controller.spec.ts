@@ -14,6 +14,10 @@ describe('PlayersController', () => {
           provide: PlayersService,
           useValue: {
             searchPlayers: jest.fn().mockResolvedValue([]),
+            getPlayerAggregate: jest.fn().mockResolvedValue({
+              profile: {},
+              stats: {},
+            }),
           },
         },
       ],
@@ -27,5 +31,11 @@ describe('PlayersController', () => {
     await playersController.searchPlayers('virat');
 
     expect(playersService.searchPlayers).toHaveBeenCalledWith('virat');
+  });
+
+  it('should call service with player id', async () => {
+    await playersController.getPlayerDetails('123');
+
+    expect(playersService.getPlayerAggregate).toHaveBeenCalledWith('123');
   });
 });
