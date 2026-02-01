@@ -5,6 +5,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PlayersModule } from './players/modules/players.module';
+import { ExternalApiQuotaService } from './common/services/external-api-quota.service';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { PlayersModule } from './players/modules/players.module';
   controllers: [AppController],
   providers: [
     AppService,
+    ExternalApiQuotaService,
     {
       provide: APP_GUARD,
       useClass: ThrottlerIpGuard,

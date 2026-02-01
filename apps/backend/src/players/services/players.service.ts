@@ -1,15 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { CricketApiService } from '../../external/services/cricket-api.service';
 import { CacheService } from '../../cache/services/cache.service';
 import { PlayerSearchResponseDto } from '../dto/player-search-response.dto';
 import { PlayerStatsResponseDto } from '../dto/player-stats-response.dto';
 import { PlayerAggregateResponseDto } from '../dto/player-aggregate-response.dto';
+import { ExternalApiQuotaService } from '../../common/services/external-api-quota.service';
 
 @Injectable()
 export class PlayersService {
   constructor(
     private readonly cricketApiService: CricketApiService,
-    private readonly cacheService: CacheService
+    private readonly cacheService: CacheService,
+    private readonly quotaService: ExternalApiQuotaService,
   ) {}
 
   async searchPlayers(name: string): Promise<PlayerSearchResponseDto[]> {
@@ -18,7 +20,19 @@ export class PlayersService {
     const cached = this.cacheService.get<PlayerSearchResponseDto[]>(cacheKey);
     if (cached) return cached;
 
+    if (!this.quotaService.canCall()) {
+      throw new HttpException(
+        {
+          message: 'Daily external API quota exceeded',
+          quota: this.quotaService.getUsage(),
+        },
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+
     const apiResponse = await this.cricketApiService.searchPlayer(name);
+
+    this.quotaService.increment();
 
     const players = apiResponse?.data?.map((player) => ({
       id: player.id,
@@ -36,8 +50,20 @@ export class PlayersService {
     const cached = this.cacheService.get<any>(cacheKey);
     if (cached) return cached;
 
+    if (!this.quotaService.canCall()) {
+      throw new HttpException(
+        {
+          message: 'Daily external API quota exceeded',
+          quota: this.quotaService.getUsage(),
+        },
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+
     const apiResponse = await this.cricketApiService.getPlayerDetails(id);
     const data = apiResponse?.data;
+
+    this.quotaService.increment();
 
     this.cacheService.set(cacheKey, data);
     return data;
