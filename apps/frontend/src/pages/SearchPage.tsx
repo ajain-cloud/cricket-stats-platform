@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { searchPlayers } from '../api/players.api';
 import type { PlayerSearchItem } from '../types/player.types';
 import PlayerCard from '../components/PlayerCard';
+import { getQuotaStatus } from '../api/quota.api';
 
 export default function SearchPage() {
   const [query, setQuery] = useState('');
   const [players, setPlayers] = useState<PlayerSearchItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [quota, setQuota] = useState<{ used: number, limit: number } | null>(null);
 
   useEffect(() => {
     if (query.trim().length < 3) {
@@ -20,6 +22,10 @@ export default function SearchPage() {
         setLoading(true);
         const data = await searchPlayers(query);
         setPlayers(data);
+
+        const quotaData = await getQuotaStatus();
+        setQuota(quotaData);
+
       } catch (err) {
         console.error(err);
         setPlayers([]);
@@ -31,6 +37,19 @@ export default function SearchPage() {
     return () => clearTimeout(timer);
   }, [query]);
 
+  useEffect(() => {
+    const fetchQuota = async () => {
+      try {
+        const data = await getQuotaStatus();
+        setQuota(data);
+      } catch (err) {
+        console.error('Failed to fetch quota', err);
+      }
+    };
+
+    fetchQuota();
+  }, []);
+
   return (
     <div className="min-h-screen bg-slate-100 flex items-start justify-center">
       <div className="w-full max-w-5xl px-6 pt-20">
@@ -38,6 +57,42 @@ export default function SearchPage() {
           <h1 className="text-4xl font-bold mb-6 text-gray-800 text-center">
             Cricket Player Search
           </h1>
+
+          {quota && (
+            <div className="mb-6 flex justify-center">
+              <div className="w-full max-w-md">
+                <div className="flex justify-between text-sm mb-1">
+                  <span className="text-gray-600">API Usage</span>
+                  <span className="font-semibold text-gray-700">
+                    {quota.used} / {quota.limit}
+                  </span>
+                </div>
+
+                <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full transition-all duration-300 ${quota.used >= quota.limit
+                      ? 'bg-red-500'
+                      : quota.used > quota.limit * 0.8
+                        ? 'bg-orange-500'
+                        : 'bg-green-500'
+                      }`}
+                    style={{
+                      width: `${Math.min(
+                        (quota.used / quota.limit) * 100,
+                        100
+                      )}%`,
+                    }}
+                  ></div>
+                </div>
+
+                {quota.used >= quota.limit && (
+                  <p className="text-xs text-red-600 mt-2 text-center">
+                    Daily API limit reached. Try again tomorrow.
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
 
           <input
             className="w-full p-4 border border-gray-300 rounded-lg mb-6 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"

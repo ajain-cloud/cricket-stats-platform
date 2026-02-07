@@ -3,7 +3,7 @@ import { RedisService } from "../redis/services/redis.service";
 
 @Injectable()
 export class ExternalApiQuotaService {
-  private readonly DAILY_LIMIT = 100;
+  private readonly DAILY_LIMIT = 5;
 
   constructor(private readonly redisService: RedisService) {}
 
