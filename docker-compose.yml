@@ -7,3 +7,15 @@ services:
     ports:
       - "6379:6379"
     restart: unless-stopped
+
+  backend:
+    build:
+      context: ./apps/backend
+    container_name: cricket-backend
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.docker
+    depends_on:
+      - redis
+    restart: unless-stopped  
