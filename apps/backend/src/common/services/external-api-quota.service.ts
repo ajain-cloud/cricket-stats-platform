@@ -1,38 +1,46 @@
 import { Injectable } from "@nestjs/common";
+import { RedisService } from "../redis/services/redis.service";
 
 @Injectable()
 export class ExternalApiQuotaService {
-  private count = 0;
-  private lastReset = this.today();
+  private readonly DAILY_LIMIT = 1;
 
-  private readonly DAILY_LIMIT = 30;
+  constructor(private readonly redisService: RedisService) {}
 
-  private today(): string {
-    return new Date().toISOString().split('T')[0];
+  private getTodayKey(): string {
+    const today = new Date().toISOString().split('T')[0];
+    return `cricapi:quota:${today}`;
   }
 
-  private resetIfNewDay() {
-    const today = this.today();
-    if (this.lastReset !== today) {
-      this.count = 0;
-      this.lastReset = today;
+  async canCall(): Promise<boolean> {
+    const client = this.redisService.getClient();
+    const count = await client.get(this.getTodayKey());
+    return Number(count ?? 0) < this.DAILY_LIMIT;
+  }
+
+  async increment(): Promise<void> {
+    const client = this.redisService.getClient();
+    const key = this.getTodayKey();
+
+    const count = await client.incr(key);
+
+    // Set expiry only on first increment
+    if (count === 1) {
+      const secondsUntilMidnight =
+        Math.floor(
+          (new Date().setHours(24, 0, 0, 0) - Date.now()) / 1000
+        );
+
+      await client.expire(key, secondsUntilMidnight);
     }
   }
 
-  canCall(): boolean {
-    this.resetIfNewDay();
-    return this.count < this.DAILY_LIMIT;
-  }
+  async getUsage() {
+    const client = this.redisService.getClient();
+    const used = Number(await client.get(this.getTodayKey())) || 0;
 
-  increment() {
-    this.resetIfNewDay();
-    this.count++;
-  }
-
-  getUsage() {
-    this.resetIfNewDay();
     return {
-      used: this.count,
+      used,
       limit: this.DAILY_LIMIT,
     };
   }

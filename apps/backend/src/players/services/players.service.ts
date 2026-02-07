@@ -20,11 +20,11 @@ export class PlayersService {
     const cached = await this.cacheService.get<any>(cacheKey);
     if (cached) return cached;
 
-    if (!this.quotaService.canCall()) {
+    if (!(await this.quotaService.canCall())) {
       throw new HttpException(
         {
           message: 'Daily external API quota exceeded',
-          quota: this.quotaService.getUsage(),
+          quota: await this.quotaService.getUsage(),
         },
         HttpStatus.TOO_MANY_REQUESTS,
       );
@@ -32,7 +32,7 @@ export class PlayersService {
 
     const apiResponse = await this.cricketApiService.searchPlayer(name);
 
-    this.quotaService.increment();
+    await this.quotaService.increment();
 
     const players = apiResponse?.data?.map((player) => ({
       id: player.id,
@@ -50,11 +50,11 @@ export class PlayersService {
     const cached = await this.cacheService.get<any>(cacheKey);
     if (cached) return cached;
 
-    if (!this.quotaService.canCall()) {
+    if (!(await this.quotaService.canCall())) {
       throw new HttpException(
         {
           message: 'Daily external API quota exceeded',
-          quota: this.quotaService.getUsage(),
+          quota: await this.quotaService.getUsage(),
         },
         HttpStatus.TOO_MANY_REQUESTS,
       );
@@ -63,7 +63,7 @@ export class PlayersService {
     const apiResponse = await this.cricketApiService.getPlayerDetails(id);
     const data = apiResponse?.data;
 
-    this.quotaService.increment();
+    await this.quotaService.increment();
 
     this.cacheService.set(cacheKey, data);
     return data;

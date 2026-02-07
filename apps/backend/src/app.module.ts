@@ -6,9 +6,11 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PlayersModule } from './players/modules/players.module';
 import { ExternalApiQuotaService } from './common/services/external-api-quota.service';
+import { RedisModule } from './common/redis/modules/redis.module';
 
 @Module({
   imports: [
+    RedisModule,
     ThrottlerModule.forRoot({
       throttlers: [
         {
