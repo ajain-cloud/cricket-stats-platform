@@ -1,22 +1,16 @@
 import { Injectable } from "@nestjs/common";
+import { RedisService } from "../../common/redis/services/redis.service";
 
 @Injectable()
 export class CacheService {
-  private cache = new Map<string, any>();
+  constructor(private readonly redisService: RedisService) {}
 
-  get<T>(key: string): T | undefined {
-    return this.cache.get(key);
+  async get<T>(key: string): Promise<T | null> {
+    const value = await this.redisService.getClient().get(key);
+    return value ? (JSON.parse(value) as T) : null;
   }
 
-  set(key: string, value: any): void {
-    this.cache.set(key, value);
-  }
-
-  delete(key: string): void {
-    this.cache.delete(key);
-  }
-
-  clear(): void {
-    this.cache.clear();
+  async set(key: string, value: any): Promise<void> {
+    await this.redisService.getClient().set(key, JSON.stringify(value));
   }
 }

@@ -17,7 +17,7 @@ export class PlayersService {
   async searchPlayers(name: string): Promise<PlayerSearchResponseDto[]> {
     const cacheKey = `players_search_${name.toLowerCase()}`;
 
-    const cached = this.cacheService.get<PlayerSearchResponseDto[]>(cacheKey);
+    const cached = await this.cacheService.get<any>(cacheKey);
     if (cached) return cached;
 
     if (!this.quotaService.canCall()) {
@@ -47,7 +47,7 @@ export class PlayersService {
   private async getPlayerInfoRaw(id: string) {
     const cacheKey = `player_info_raw_${id}`;
 
-    const cached = this.cacheService.get<any>(cacheKey);
+    const cached = await this.cacheService.get<any>(cacheKey);
     if (cached) return cached;
 
     if (!this.quotaService.canCall()) {

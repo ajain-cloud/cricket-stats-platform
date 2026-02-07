@@ -6,7 +6,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PlayersModule } from './players/modules/players.module';
 import { ExternalApiQuotaService } from './common/services/external-api-quota.service';
-import { RedisService } from './common/redis/redis.service';
 
 @Module({
   imports: [
@@ -24,7 +23,6 @@ import { RedisService } from './common/redis/redis.service';
   providers: [
     AppService,
     ExternalApiQuotaService,
-    RedisService,
     {
       provide: APP_GUARD,
       useClass: ThrottlerIpGuard,
