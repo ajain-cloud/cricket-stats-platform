@@ -9,6 +9,7 @@ export default function SearchPage() {
   const [players, setPlayers] = useState<PlayerSearchItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [quota, setQuota] = useState<{ used: number, limit: number } | null>(null);
+  const isQuotaExceeded = quota !== null && quota.used >= quota.limit;
 
   useEffect(() => {
     if (query.trim().length < 3) {
@@ -23,11 +24,16 @@ export default function SearchPage() {
         const data = await searchPlayers(query);
         setPlayers(data);
 
+        // refresh quota after successful search
         const quotaData = await getQuotaStatus();
         setQuota(quotaData);
-
-      } catch (err) {
-        console.error(err);
+      } catch (err: any) {
+        if (err?.response?.status === 429) {
+          const quotaData = await getQuotaStatus();
+          setQuota(quotaData);
+        } else {
+          console.error(err);
+        }
         setPlayers([]);
       } finally {
         setLoading(false);
@@ -85,8 +91,8 @@ export default function SearchPage() {
                   ></div>
                 </div>
 
-                {quota.used >= quota.limit && (
-                  <p className="text-xs text-red-600 mt-2 text-center">
+                {isQuotaExceeded && (
+                  <p className="text-center text-red-600 text-sm mb-4">
                     Daily API limit reached. Try again tomorrow.
                   </p>
                 )}
@@ -95,8 +101,16 @@ export default function SearchPage() {
           )}
 
           <input
-            className="w-full p-4 border border-gray-300 rounded-lg mb-6 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Search player (e.g. Virat, Bumrah...)"
+            disabled={isQuotaExceeded}
+            className={`w-full p-4 border rounded-lg mb-6 text-lg focus:outline-none ${isQuotaExceeded
+              ? 'bg-gray-100 cursor-not-allowed'
+              : 'focus:ring-2 focus:ring-blue-500'
+              }`}
+            placeholder={
+              isQuotaExceeded
+                ? 'Daily API limit reached'
+                : 'Search player (e.g. Virat, Bumrah...)'
+            }
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
