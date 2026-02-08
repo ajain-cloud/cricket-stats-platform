@@ -19,3 +19,14 @@ services:
     depends_on:
       - redis
     restart: unless-stopped  
+
+  frontend:
+    build:
+      context: ./apps/frontend
+      args:
+        VITE_API_BASE_URL: http://localhost:3000
+    container_name: cricket-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend        
