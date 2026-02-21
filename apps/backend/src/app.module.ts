@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { HealthModule } from './health/modules/health.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ThrottlerIpGuard } from './common/guards/throttler-ip.guard';
 import { APP_GUARD } from '@nestjs/core';
@@ -11,6 +12,7 @@ import { QuotaController } from './quota/controllers/quota.controller';
 
 @Module({
   imports: [
+    HealthModule,
     RedisModule,
     ThrottlerModule.forRoot({
       throttlers: [
