@@ -1,9 +1,10 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { HealthModule } from './health/modules/health.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ThrottlerIpGuard } from './common/guards/throttler-ip.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
+import { RequestLoggerMiddleware } from './common/middleware/request-logger.middleware';
 import { AppService } from './app.service';
 import { PlayersModule } from './players/modules/players.module';
 import { ExternalApiQuotaService } from './common/services/external-api-quota.service';
@@ -34,4 +35,9 @@ import { QuotaController } from './quota/controllers/quota.controller';
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RequestLoggerMiddleware).forRoutes('*');
+  }
+}

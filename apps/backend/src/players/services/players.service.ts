@@ -1,4 +1,4 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { CricketApiService } from '../../external/services/cricket-api.service';
 import { CacheService } from '../../cache/services/cache.service';
 import { PlayerSearchResponseDto } from '../dto/player-search-response.dto';
@@ -8,6 +8,9 @@ import { ExternalApiQuotaService } from '../../common/services/external-api-quot
 
 @Injectable()
 export class PlayersService {
+
+  private readonly logger = new Logger(PlayersService.name);
+  
   constructor(
     private readonly cricketApiService: CricketApiService,
     private readonly cacheService: CacheService,
@@ -15,6 +18,8 @@ export class PlayersService {
   ) {}
 
   async searchPlayers(name: string): Promise<PlayerSearchResponseDto[]> {
+    this.logger.log(`Searching players with query: ${name}`);
+
     const cacheKey = `players_search_${name.toLowerCase()}`;
 
     const cached = await this.cacheService.get<any>(cacheKey);
@@ -59,6 +64,8 @@ export class PlayersService {
         HttpStatus.TOO_MANY_REQUESTS,
       );
     }
+
+    this.logger.log(`Fetching player ${id} from external API`);
 
     const apiResponse = await this.cricketApiService.getPlayerDetails(id);
     const data = apiResponse?.data;
